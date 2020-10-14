@@ -1,0 +1,57 @@
+
+
+<MainScreen>:
+    orientation: 'vertical'
+    padding: self.width*0.05 #20
+    spacing: 5
+    text_input: text_input
+    place_label: place_label
+    
+    # canvas.before:
+    #     Color:
+    #         rgba: 0, 0, 0, 1
+    #     Rectangle:
+    #         pos: self.pos
+    #         size: self.size
+    
+    BoxLayout:
+        size_hint: .5, None
+        height: '48dp'
+        spacing: 5
+
+        MDTextButton:
+            text: 'Обновить сервер'
+            on_release: app.file_manager_open()
+
+    MDTextField:
+        id: text_input
+        hint_text: 'Введите артикул'
+        helper_text: ''
+        helper_text_mode: 'persistent'
+        pos_hint: {'center_y': .8}
+        on_text_validate: root.show_place()
+        
+    
+    MDLabel:
+        id: place_label
+        text: 'A-00-00-00'
+        halign: 'center'
+        theme_text_color: 'Primary'
+        # text_color: app.theme_cls.text_color
+        font_size: self.width*0.17
+        pos_hint: {'center_y': .4}
+        # text_size: root.width, None
+
+    BoxLayout:
+        spacing: 5
+        orientation: 'horizontal'
+
+        # MDRectangleFlatButton:
+        #     text: "Обновить"
+        #     on_release: root.makeDict()
+        #     elevation_normal: 20
+
+        MDRectangleFlatButton:
+            text: "Выход"
+            #pos_hint: {'center_y': .5}
+            on_release: app.stop()
