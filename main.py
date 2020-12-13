@@ -9,9 +9,13 @@ from kivymd.toast import toast
 from openpyxl import load_workbook
 import pymysql
 
+Host = "remotemysql.com"
+Port = 3306
+User = "3ALraEDF4c"
+Password = "L3pBenmNFz"
 
 class MainScreen(BoxLayout):
-    con = pymysql.connect(host="remotemysql.com",port=3306,user="fIhBLyLC6W", passwd="jQzzjA68E0",db="fIhBLyLC6W")
+    con = pymysql.connect(host=Host,port=Port,user=User, passwd=Password,db=User)
     cur = con.cursor()
     cur.execute("SELECT * FROM Articles")
     rows = cur.fetchall()
@@ -80,7 +84,7 @@ class ShelfApp(MDApp):
         return MainScreen()
 
     def file_manager_open(self):
-        self.file_manager.show('/data/media/0')
+        self.file_manager.show("/")#('/data/media/0')
         self.manager_open = True
         # output manager to the screen
 
@@ -105,12 +109,12 @@ class ShelfApp(MDApp):
         self.path = path
         self.d = self.dict_from_xl(self.path)
         self.arts  = list(self.d.keys())
-        self.con = pymysql.connect(host="remotemysql.com",
-        port=3306, user="fIhBLyLC6W", passwd="jQzzjA68E0",
-        db="fIhBLyLC6W")
+        self.con = pymysql.connect(host=Host,
+        port=Port, user=User, passwd=Password,
+        db=User)
         self.cur = self.con.cursor()
         # sql = "UPDATE Articles set adress = %s where article = %s"
-        self.sql = "INSERT INTO Articles (article, adress) VALUES (%s, %s)"
+        self.sql = "INSERT INTO Articles (Article, Adress) VALUES (%s, %s)"
        # for i in arts:
         #   art = i
          #  adr = d[i]
@@ -124,9 +128,9 @@ class ShelfApp(MDApp):
         
 
     def delete_old_data(self):
-        self.con = pymysql.connect(host="remotemysql.com",
-        port=3306, user="fIhBLyLC6W", passwd="jQzzjA68E0",
-        db="fIhBLyLC6W")
+        self.con = pymysql.connect(host=Host,
+        port=Port, user=User, passwd=Password,
+        db=User)
         self.cur = self.con.cursor()
         self.Delete_all_rows = """truncate table Articles """
         self.cur.execute(self.Delete_all_rows)
