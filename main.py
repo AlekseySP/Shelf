@@ -1,3 +1,4 @@
+from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
@@ -7,23 +8,80 @@ from kivymd.uix.filemanager import MDFileManager
 from kivymd.app import MDApp
 from kivymd.toast import toast
 from openpyxl import load_workbook
-import pymysql
+import os
 
-Host = "remotemysql.com"
-Port = 3306
-User = "3ALraEDF4c"
-Password = "L3pBenmNFz"
+KV = '''
+BoxLayout:
+    orientation: 'vertical'
+    padding: self.width*0.05 #20
+    spacing: 5
+    text_input: text_input
+    place_label: place_label
+    
+    # canvas.before:
+    #     Color:
+    #         rgba: 0, 0, 0, 1
+    #     Rectangle:
+    #         pos: self.pos
+    #         size: self.size
+    
+    BoxLayout:
+        size_hint: .5, None
+        height: '48dp'
+        spacing: 5
+
+        MDTextButton:
+            text: 'Обновить базу адресов'
+            on_release: app.file_manager_open()
+
+    MDTextField:
+        id: text_input
+        hint_text: 'Введите артикул'
+        helper_text: ''
+        helper_text_mode: 'persistent'
+        pos_hint: {'center_y': .8}
+        on_text_validate: root.show_place()
+        
+    MDProgressBar:
+        value: 50
+
+    MDLabel:
+        id: place_label
+        text: 'A-00-00-00'
+        halign: 'center'
+        theme_text_color: 'Primary'
+        # text_color: app.theme_cls.text_color
+        font_size: self.width*0.17
+        pos_hint: {'center_y': .4}
+        # text_size: root.width, None
+
+    BoxLayout:
+        spacing: 5
+        orientation: 'horizontal'
+
+        # MDRectangleFlatButton:
+        #     text: "Обновить"
+        #     on_release: root.makeDict()
+        #     elevation_normal: 20
+
+        MDRectangleFlatButton:
+            text: "Выход"
+            #pos_hint: {'center_y': .5}
+            on_release: app.stop()
+'''
+
 
 class MainScreen(BoxLayout):
-    con = pymysql.connect(host=Host,port=Port,user=User, passwd=Password,db=User)
-    cur = con.cursor()
-    cur.execute("SELECT * FROM Articles")
-    rows = cur.fetchall()
+    file_name = "shelfadress.txt"
+    path = ""#"(/home/sveta/programming/git") # ("/")#('/data/media/0')
+    file_path = os.path.join(path, file_name)
+    if os.path.isfile(file_path) == False:
+        innerAdressfile = open(file_name, "w+")
+        innerAdressfile.write("TAB-057:A-01-05-03")
+        innerAdressfile.close()
+
+    # TODO добавить загрузку из xlsx файла для adres_dict
     adres_dict = {}
-    for row in rows:
-        ar = str(row[0])
-        ad = str(row[1])
-        adres_dict[ar] = ad
     loadfile = ObjectProperty(None)
     text_input = ObjectProperty(None)
     place_label = ObjectProperty(None)
@@ -81,7 +139,8 @@ class ShelfApp(MDApp):
         self.file_manager.ext = ['.xlsx']
 
     def build(self):
-        return MainScreen()
+        #return MainScreen()
+        return Builder.load_string(KV)
 
     def file_manager_open(self):
         self.file_manager.show("/")#('/data/media/0')
@@ -106,38 +165,15 @@ class ShelfApp(MDApp):
         return self.adres_dict
 
     def upload_data(self, path):
-        self.path = path
-        self.d = self.dict_from_xl(self.path)
-        self.arts  = list(self.d.keys())
-        self.con = pymysql.connect(host=Host,
-        port=Port, user=User, passwd=Password,
-        db=User)
-        self.cur = self.con.cursor()
-        # sql = "UPDATE Articles set adress = %s where article = %s"
-        self.sql = "INSERT INTO Articles (Article, Adress) VALUES (%s, %s)"
-       # for i in arts:
-        #   art = i
-         #  adr = d[i]
-         #  val = (art, adr)
-        self.val = [(i, self.d[i]) for i in self.arts]
-        self.cur.executemany(self.sql, self.val)
-        self.con.commit()
-        self.cur.close()
-        self.con.close()
-        print("Data uploading complete.")
+        # TODO функция заполнения внутреннего xlsx файла
+        # из внешнего, указанного пользователем
+        print("Загрузка завершена")
         
 
     def delete_old_data(self):
-        self.con = pymysql.connect(host=Host,
-        port=Port, user=User, passwd=Password,
-        db=User)
-        self.cur = self.con.cursor()
-        self.Delete_all_rows = """truncate table Articles """
-        self.cur.execute(self.Delete_all_rows)
-        self.con.commit()
-        print("All Record Deleted successfully")
-        self.cur.close()
-        self.con.close()
+        # TODO функция очистки внутреннего файла перед
+        # заполнением (возможно не нужна)
+        print("В процессе...")
 
 
     def select_path(self, path):
@@ -148,7 +184,7 @@ class ShelfApp(MDApp):
         '''
         self.exit_manager()
         self.server_update(path)
-        toast('Сервер обновлён')
+        toast('Адреса обновлены')
     def exit_manager(self, *args):
         '''Called when the user reaches the root of the directory tree.'''
         self.manager_open = False
